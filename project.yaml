@@ -1,0 +1,34 @@
+customer: 'Evil Corp, Inc.'
+
+name: 'How I Hacked The Worst Company Ever!'
+
+services:
+  - 'Add a new vulnerability rating system to the "report-generator"'
+  - '5 Vulnerabilities Report'
+
+scope:
+  - '`evil-corp.com` (application server)'
+  - '`https://4ever-evil.com/` (web application + API)'
+
+period:
+  start: 'yyyy-mm-dd'
+  end: 'yyyy-mm-dd'
+
+personnel:
+  - 'Alessio Stefan (alessiosteph@proton.me)'
+
+report:
+  template: 'english'
+  revision: '2024-04-10'
+
+# this part is optional; i.e. you could remove it
+requirements:
+  - 'technical contact personnel: fulfilled'
+  - 'user accounts (at least two per type) for the web application: fulfilled'
+  - 'API access token: fulfilled'
+  - '[OpenAPI Specification](https://www.openapis.org/) document for the API: none provided'
+
+# this part is optional; i.e. you could remove it
+provided_information:
+  - 'source code of the web application'
+  - 'Apache config'

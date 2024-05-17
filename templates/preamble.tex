@@ -1,0 +1,253 @@
+\documentclass[a4paper]{article}
+
+\usepackage[margin=3cm]{geometry}
+
+% the last of the arguments is the default language
+\usepackage[ngerman,english]{babel}
+
+% header and footer
+\usepackage{fancyhdr}
+
+\usepackage[utf8]{inputenc}
+
+\usepackage[pdftex]{graphicx}
+
+% we need to use 'minipage' for figures (instead of the 'figure' environment).
+% hence, we need the 'captionof' command (part of the 'caption' package).
+\usepackage{caption}
+
+\usepackage{xcolor}
+
+% code background
+\definecolor{code}{gray}{.95}
+
+% create diagrams
+\usepackage{tikz}
+
+%\usepackage{hyperref}
+\usepackage[pdftex,
+            pdfauthor={Secure by Default, Inc.},
+            pdftitle={Penetration Test Report},
+            pdfsubject={\VAR{ project.name }},
+            pdfkeywords={},
+            pdfproducer={LaTeX},
+            pdfcreator={pdflatex}]{hyperref}
+            
+% inline code
+\newcommand{\passthrough}[1]{\colorbox{code}{\lstset{mathescape=false}#1}}
+
+% define level-4 section
+\usepackage{titlesec}
+\setcounter{secnumdepth}{4}
+\titleformat{\paragraph}
+  {\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+  \titlespacing*{\paragraph}
+  {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+% Pandoc uses '\tightlist' inside list environments
+\def\tightlist{}
+
+% disable indentation of first line of paragraphs
+\usepackage{parskip}
+
+% nice code listings
+\usepackage{listings}
+\lstset{
+  backgroundcolor=\color{code},
+  basicstyle=\footnotesize\ttfamily,
+  upquote=true,
+  linewidth=\textwidth,
+  breaklines,
+  breakatwhitespace,
+  frame=single,
+  numbers=none,
+}
+
+% severity gauge
+%
+%              7
+% ||||||||||||||......
+% 0                 10
+\newcommand{\severitygauge}[3][1]{
+  \begin{tikzpicture}[scale=#1]
+    % bounding box
+    \path (-3,0) (13,0);
+
+    % empty rectangle
+    \filldraw[fill=white, draw=black] (0, -0.1) rectangle (10, 0.1);
+
+    % filled rectangle, showing the gauge's measurement
+    \filldraw[fill=black, draw=black] (0, -0.1) rectangle (#2, 0.1);
+
+    % range of the gauge
+    \path (0, -0.2) node[anchor=north]{0};
+    \path (10, -0.2) node[anchor=north]{10};
+
+    % the gauge's measurement as text
+    \path (#2, 0.2) node[anchor=south]{#3};
+  \end{tikzpicture}
+}
+
+% minimal severity gauge: without range and textual measurement.
+% horizontal
+\newcommand{\minmalseveritygaugeH}[2][1]{
+  \begin{tikzpicture}[scale=#1, baseline=-0.5ex]
+    \filldraw[fill=white, draw=black] (0, -0.3) rectangle (10, 0.3);
+    \filldraw[fill=black, draw=black] (0, -0.3) rectangle (#2, 0.3);
+  \end{tikzpicture}
+}
+
+% minimal severity gauge: without range and textual measurement.
+% vertical
+\newcommand{\minmalseveritygaugeV}[2][1]{
+  \begin{tikzpicture}[scale=#1]
+    \path (0, 0) (0, 12); % bounding box
+    \filldraw[fill=white, draw=black] (-0.5, 0) rectangle (0.5, 10);
+    \filldraw[fill=black, draw=black] (-0.5, 0) rectangle (0.5, #2);
+  \end{tikzpicture}
+}
+
+
+
+
+ % -------------------- GAUGE BAR SSVC --------------------------------
+\newcommand{\severitygaugeSSVC}[2][1]{
+  \begin{tikzpicture}[scale=#1]
+    % bounding box
+    \path (-1,0) (5,0);
+
+    % empty rectangle
+    \filldraw[fill=white, draw=black] (0, -0.1) rectangle (4, 0.1);
+
+    % filled rectangle, showing the gauge's measurement
+    \filldraw[fill=black, draw=black] (0, -0.1) rectangle (#2, 0.1);
+
+    % range of the gauge
+    \path (1, -0.2) node[anchor=north]{Track};
+    \path (2, -0.2) node[anchor=north] {Track*}
+    \path (3, -0.2) node[anchor=north] {Attend}
+    \path (4, -0.2) node[anchor=north]{Act};
+
+  \end{tikzpicture}
+}
+
+
+
+
+
+
+% conditionals (in macros)
+\usepackage{etoolbox}
+
+\newcommand{\highlight}[3]{
+  \ifstrequal{#2}{#3}{\framebox{#1}}{#1}
+}
+
+\newcommand{\CVSStwo}[7]{
+  \begin{tabular}{ll}
+    \textbf{Access Vector} & \textbf{Confidentiality Impact}
+    \\
+    \highlight{Local}{L}{#2} \hspace{0.5em} \highlight{Adjacent Network}{A}{#2} \hspace{0.5em} \highlight{Network}{N}{#2}
+    \hspace{2em}
+    &
+    \highlight{None}{N}{#5} \hspace{0.5em} \highlight{Partial}{P}{#5} \hspace{0.5em} \highlight{Complete}{C}{#5}
+    \vspace{1.5ex}
+    \\
+    \textbf{Access Complexity} & \textbf{Integrity Impact}
+    \\
+    \highlight{High}{H}{#3} \hspace{0.5em} \highlight{Medium}{M}{#3} \hspace{0.5em} \highlight{Low}{L}{#3}
+    \hspace{2em}
+    &
+    \highlight{None}{N}{#6} \hspace{0.5em} \highlight{Partial}{P}{#6} \hspace{0.5em} \highlight{Complete}{C}{#6}
+    \vspace{1.5ex}
+    \\
+    \textbf{Authentication} & \textbf{Availability Impact}
+    \\
+    \highlight{Multiple}{M}{#4} \hspace{0.5em} \highlight{Single}{S}{#4} \hspace{0.5em} \highlight{None}{N}{#4}
+    \hspace{2em}
+    &
+    \highlight{None}{N}{#7} \hspace{0.5em} \highlight{Partial}{P}{#7} \hspace{0.5em} \highlight{Complete}{C}{#7}
+  \end{tabular}
+}
+
+\newcommand{\CVSSthree}[9]{
+  \begin{tabular}{ll}
+    \textbf{Attack Vector} & \textbf{Scope}
+    \\
+    \highlight{Network}{N}{#2} \hspace{0.5em} \highlight{Adjacent}{A}{#2} \hspace{0.5em} \highlight{Local}{L}{#2} \hspace{0.5em} \highlight{Physical}{P}{#2}
+    \hspace{2em}
+    &
+    \highlight{Unchanged}{U}{#6} \hspace{0.5em} \highlight{Changed}{C}{#6}
+    \vspace{1.5ex}
+    \\
+    \textbf{Attack Complexity} & \textbf{Confidentiality}
+    \\
+    \highlight{Low}{L}{#3} \hspace{0.5em} \highlight{High}{H}{#3}
+    \hspace{2em}
+    &
+    \highlight{None}{N}{#7} \hspace{0.5em} \highlight{Low}{L}{#7} \hspace{0.5em} \highlight{High}{H}{#7}
+    \vspace{1.5ex}
+    \\
+    \textbf{Privileges Required} & \textbf{Integrity}
+    \\
+    \highlight{None}{N}{#4} \hspace{0.5em} \highlight{Low}{L}{#4} \hspace{0.5em} \highlight{High}{H}{#4}
+    \hspace{2em}
+    &
+    \highlight{None}{N}{#8} \hspace{0.5em} \highlight{Low}{L}{#8} \hspace{0.5em} \highlight{High}{H}{#8}
+    \vspace{1.5ex}
+    \\    
+    \textbf{User Interaction} & \textbf{Availability}
+    \\
+    \highlight{None}{N}{#5} \hspace{0.5em} \highlight{Required}{R}{#5}
+    \hspace{2em}
+    &
+    \highlight{None}{N}{#9} \hspace{0.5em} \highlight{Low}{L}{#9} \hspace{0.5em} \highlight{High}{H}{#9}
+  \end{tabular}
+}
+
+\newcommand{\DREAD}[5]{
+  \begin{tabular}{lccc}
+    \textbf{Damage}          & \highlight{Low}{L}{#1} & \highlight{Medium}{M}{#1} & \highlight{High}{H}{#1} \\
+    \textbf{Reliability}     & \highlight{Low}{L}{#2} & \highlight{Medium}{M}{#2} & \highlight{High}{H}{#2} \\
+    \textbf{Exploitability}  & \highlight{Low}{L}{#3} & \highlight{Medium}{M}{#3} & \highlight{High}{H}{#3} \\
+    \textbf{Affected Users}  & \highlight{Low}{L}{#4} & \highlight{Medium}{M}{#4} & \highlight{High}{H}{#4} \\
+    \textbf{Discoverability} & \highlight{Low}{L}{#5} & \highlight{Medium}{M}{#5} & \highlight{High}{H}{#5} 
+  \end{tabular}
+}
+
+
+
+\newcommand{\SSVCtwo}[7]{
+  \begin{tabular}{ll}
+    \textbf{Exploitation} & \textbf{Automable}
+    \\
+    \highlight{PoC}{P}{#1} \hspace{0.5em} \highlight{Active}{A}{#1} \hspace{0.5em} \highlight{None}{N}{#1} \hspace{0.5em} \highlight{Physical}{P}{#2}
+    \hspace{2em}
+    &
+    \highlight{Yes}{Y}{#2} \hspace{0.5em} \highlight{No}{N}{#2}
+    \vspace{1.5ex}
+    \\
+    \textbf{Technical Impact} & \textbf{Mission and Well-Being}
+    \\
+    \highlight{Partial}{P}{#3} \hspace{0.5em} \highlight{Total}{T}{#3}
+    \hspace{2em}
+    &
+    \highlight{Low}{L}{#6} \hspace{0.5em} \highlight{Medium}{M}{#6} \hspace{0.5em} \highlight{High}{H}{#6}
+    \vspace{1.5ex}
+    \\
+    \textbf{Decision} 
+    \\
+    \highlight{Track}{T}{#7} \hspace{0.5em} \highlight{Track*}{R}{#7} \hspace{0.5em} \highlight{Attend}{A}{#7} \hspace{0.5em} \highlight{Act}{C}{#7}
+  \end{tabular}
+}
+
+
+
+
+% align columns at decimal points
+\usepackage{dcolumn}
+\newcolumntype{d}[1]{D{.}{.}{#1}}
+
+% nicer tables
+\setlength{\tabcolsep}{10pt} % increase horizontal spacing; default value: 6pt
+\renewcommand{\arraystretch}{1.5} % increase vertical spacing; default value: 1

@@ -1,0 +1,73 @@
+# id
+
+* class of vulnerability
+* subclass
+
+# title
+
+Vulnerability Title
+
+# description
+
+Describe the vulnerability (not the evidence) as clearly as possible for the customer to unterstand.
+
+The following properties of the `issue` object are optional:
+
+* `title`
+* `description`
+* `recommendations`
+* `references`
+
+Just be sure that you are referencing an existing vulnerability inside your library (i.e. with the `id` property)!
+
+You can overwrite any of the above properties by providing them in the issue Markdown document.
+
+# evidence
+
+## vulnerable.example.com
+
+Describe the evidence as detailed as possible.
+If possible, use cURL instead of screenshots of Burp.
+
+```
+$ curl -iks https://vulnerable.example.com/ | grep -i 'server:'
+Server: Apache 2.14
+```
+
+You can add screenshots (see at the end of this file); reference them with !REF:<issue filename>:<image filename>! (if the issue is part of a issue group use !REF:<group nr>:<group name>:<issue filename>:<image filename>!).
+You can also reference other issues: !REF:<issue filename>! (if the referenced issue is part of an issue group use !REF:<group nr>:<group name>:<issue filename>!).
+
+**Severity: 9.8**
+
+## POST api.example.com/v2/resource
+
+Another evidence ...
+
+**Severity: 3.1**
+      
+# affected assets
+
+* vulnerable.example.com
+* api.example.com
+
+# severity
+
+9.8 (Critical)
+CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H
+CVSS:2/AV:N/AC:L/Au:N/C:C/I:C/A:C
+D:M/R:H/E:H/A:L/D:M
+
+use either CVSS or DREAD
+
+# recommendations
+
+Give detailed steps on how to mitigate the vulnerability.
+
+# references
+
+* [Reference](https://example.com/)
+
+# images
+
+* ![Image caption.](image.png)
+* ![Caption text.](another_image.png)

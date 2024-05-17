@@ -1,0 +1,367 @@
+\BLOCK{ include "preamble.tex" }
+
+\begin{document}
+
+% header and footer
+\pagestyle{fancy}
+\fancyhf{} % clear existing header/footer entries
+
+\begin{titlepage}
+
+  \vspace*{\fill}
+
+  \begin{center}
+    \makebox[\textwidth]{\includegraphics[width=\paperwidth]{templates/title}}
+  \end{center}
+
+  \vfill
+  
+  {
+    \Huge \textbf{\MakeUppercase{Penetration Test Report}}
+    \vspace{1ex}
+  }
+
+  {
+    \Large \textbf{\VAR{ project.customer }}
+    %\vspace{1ex}
+  }
+
+  {
+    \Large \textbf{\VAR{ project.name }}
+    %\vspace{1ex}
+  }
+
+  \VAR{ project.report.revision }
+\end{titlepage}
+
+\fancyhead[L]{\VAR{ project.name }}
+\fancyhead[R]{Confidential}
+
+\fancyfoot[C]{\thepage}
+
+{
+  \vspace*{\fill}
+
+  This report is for the sole information and use of \VAR{ project.customer|trim('.') }.
+
+  \textbf{Secure By Default, Inc.} \\
+  \href{tel:+0123456789}{+0 123 456 789} \\
+  \href{mailto:contact@sbd.local}{contact@sbd.local} \\
+  \href{https://sbd.local/}{https://sbd.local/}
+}
+
+\clearpage
+\section*{Executive Summary}
+%\addcontentsline{toc}{section}{Executive Summary}
+
+\VAR{ project.customer }\ (i.e.\ the customer) engaged Secure By Default, Inc.\ to conduct a penetration test on their systems.
+In accordance with the customer the following types of penetration tests have been conducted:
+
+\begin{itemize}
+  \BLOCK{ for service in project.services }
+    \item \VAR{ service|markdown2latex }
+  \BLOCK{ endfor }
+\end{itemize}
+
+
+
+%+++++++++++++++++++++JUST WITH CVSS++++++++++++++++++++++++++++++++++++++++++++
+\BLOCK{ if "cvss" in issues[0]["severity"] }
+  Vulnerabilities with severity scores between \VAR{ (issues|min(attribute='severity.number')).severity.number } and \VAR{ (issues|max(attribute='severity.number')).severity.number } (on a scale from 0--10) have been found (see Table~\ref{tab:vulnerabilities}).
+  A detailed list thereof, including descriptions on how they were found, and recommendations for mitigations, can be found in Section~\ref{sec:results}.
+
+  \begin{table}[h!]
+    \centering
+    \caption{The vulnerability classes, the highest severity, and the number of issues per class.}
+    \label{tab:vulnerabilities}
+    \begin{tabular}{lcr}
+      \textbf{Class} & \textbf{Severity} & \textbf{Issues} \\
+      \hline
+      \BLOCK{ for class, items in issues|groupby("class") }
+        \VAR{ class|title } & \minmalseveritygaugeH[0.2]{\VAR{ (items|max(attribute='severity.number')).severity.number }} & \VAR{ items|length } \\
+      \BLOCK{ endfor }
+      \hline
+      \textbf{Total} & ~ & \textbf{\VAR{ issues|length }}
+    \end{tabular}
+  \end{table}
+%+++++++++++++++++++++JUST WITH CVSS++++++++++++++++++++++++++++++++++++++++++++
+
+
+
+
+
+%+++++++++++++++++++++JUST WITH SSVC (DONE!)++++++++++++++++++++++++++++++++++++++++++++
+\BLOCK{ else }
+
+ Vulnerabilities with severity scores between \VAR{ (issues|min(attribute='severity.value')).severity.category } and \VAR{ (issues|max(attribute='severity.value')).severity.category } (on a scale from Track--Act) have been found (see Table~\ref{tab:vulnerabilities}).
+  A detailed list thereof, including descriptions on how they were found, and recommendations for mitigations, can be found in Section~\ref{sec:results}.
+
+
+  \begin{table}[h!]
+    \centering
+    \caption{The vulnerability classes, the highest Decision, and the number of issues per class.}
+    \label{tab:vulnerabilities}
+    \begin{tabular}{lcr}
+      \textbf{Class} & \textbf{Highest Decision} & \textbf{Issues} \\
+      \hline
+      \BLOCK{ for class, items in issues|groupby("class") }
+        \VAR{ class|title } & \VAR{ (items|max(attribute='severity.value')).severity.category }} & \VAR{ items|length } \\
+      \BLOCK{ endfor }
+      \hline
+      \textbf{Total} & ~ & \textbf{\VAR{ issues|length }}
+    \end{tabular}
+  \end{table}
+
+\BLOCK{ endif }
+%+++++++++++++++++++++JUST WITH SSVC (DONE!)++++++++++++++++++++++++++++++++++++++++++++
+
+
+\VAR{ summary|markdown2latex }
+
+\clearpage
+\tableofcontents
+
+\clearpage
+\section{Introduction}
+
+\VAR{ project.customer }\ (i.e.\ the customer) engaged Secure By Default, Inc.\ to conduct a penetration test on their systems.
+In accordance with the customer the following types of penetration tests have been conducted:
+
+\begin{itemize}
+  \BLOCK{ for service in project.services }
+    \item \VAR{ service|markdown2latex }
+  \BLOCK{ endfor }
+\end{itemize}
+
+\subsection{Personnel}
+
+The following people were involved in this penetration test:
+
+\begin{itemize}
+  \BLOCK{ for person in project.personnel }
+    \item \VAR{ person|markdown2latex }
+  \BLOCK{ endfor }
+\end{itemize}
+
+\subsection{Scope}
+
+Between \VAR{ project.period.start } and \VAR{ project.period.end } the following components have been analyzed:
+
+\begin{itemize}
+  \BLOCK{ for scope in project.scope }
+    \item \VAR{ scope|markdown2latex }
+  \BLOCK{ endfor }
+\end{itemize}
+
+All test-related IP traffic originates from the following addresses:
+
+\begin{itemize}
+  \item \passthrough{192.168.0.0/24}
+\end{itemize}
+
+\subsection{Methodology}
+
+As asked by Patrick Himler I would grab 5 vulnerabilities found in my (little) CTF experience. This
+vulnerabilities would be managed as stand-alone so obviously the report sections are not connected to
+each others and are part of different machine. I would use the template to make a brief description of every vulnerability context so you can make an idea of the rating I gave to them, since I am not that keen with SSVC you could expect unaccurate results. I will explain briefly why I choose a specific path in the Decision tree to make it clear also I will try to use all the capabilities provided by the tools (image, link, snippet of code).
+
+\BLOCK{ if project.requirements }
+  \subsection{Requirements}
+
+  Secure By Default required the following from the customer:
+
+  \begin{itemize}
+    \BLOCK{ for req in project.requirements }
+      \item \VAR{ req|markdown2latex }
+    \BLOCK{ endfor }
+  \end{itemize}
+\BLOCK{ endif }
+
+\BLOCK{ if project.provided_information }
+  \subsection{Provided Information}
+
+  The customer has provided the following additional information:
+
+  \begin{itemize}
+    \BLOCK{ for info in project.provided_information }
+      \item \VAR{ info|markdown2latex }
+    \BLOCK{ endfor }
+  \end{itemize}
+\BLOCK{ endif }
+
+\BLOCK{ if limitations }
+  \subsection{Limitations}
+
+  Due to the time-constrained nature of audits, it is common to encounter coverage limitations.
+  The following limitations were identified during this engagement.
+  Secure By Default recommends further review and/or retesting of the affected systems/components.
+
+  \VAR{ limitations|markdown2latex }
+\BLOCK{ endif }
+
+\subsection{Tools}
+
+The following tools have been used during the engagement:
+
+\VAR{ tools|markdown2latex }
+
+\clearpage
+
+\section{Results}
+\label{sec:results}
+
+
+
+        %+++++++++++++++++++++++++++ JUST CVSS ++++++++++++++++++++++
+\BLOCK{ if "cvss" in issues[0]["severity"] }
+
+  \BLOCK{ for group in groups|sort(attribute='order') }
+    \begin{table}[h!]
+      \centering
+      \caption{Vulnerabilities and their severity\BLOCK{ if group.name } (component ``\VAR{ group.name }'')\BLOCK{ endif }.}
+      \begin{tabular}{ p{0.65\linewidth} c d{1} }
+
+        
+
+        \textbf{Vulnerability} & \multicolumn{2}{c}{\textbf{Severity}} \\
+        \hline
+        \BLOCK{ for issue in issues|sort(attribute='severity.number', reverse=true) if issue.group.order == group.order }
+          \hyperref[\VAR{ issue.label }]{\VAR{ issue.title }} & \minmalseveritygaugeH[0.2]{\VAR{ issue.severity.number }} & \VAR{ issue.severity.number } \\
+
+
+
+
+        \BLOCK{ endfor }
+      \end{tabular}
+    \end{table}
+  \BLOCK{ endfor }
+\BLOCK{ endif }
+        %+++++++++++++++++++++++++++ JUST CVSS ++++++++++++++++++++++
+
+
+
+
+
+
+
+
+        %+++++++++++++++++++++++++++ JUST SSVC ++++++++++++++++++++++
+
+\BLOCK{ if "ssvc" in issues[0]["severity"] }
+
+  \BLOCK{ for group in groups|sort(attribute='order') }
+      \begin{table}[h!]
+        \centering
+        \caption{Vulnerabilities and their severity\BLOCK{ if group.name } (component ``\VAR{ group.name }'')\BLOCK{ endif }.}
+        \begin{tabular}{ p{0.65\linewidth} c d{1} }
+
+          
+
+          \textbf{Vulnerability} & \textbf{Decision} \\
+          \hline
+          \BLOCK{ for issue in issues|sort(attribute='severity.value', reverse=true) if issue.group.order == group.order }
+            \hyperref[\VAR{ issue.label }]{\VAR{ issue.title }} & \VAR{ issue.severity.category } \\
+
+
+          \BLOCK{ endfor }
+        \end{tabular}
+      \end{table}
+    \BLOCK{ endfor }
+
+\BLOCK{ endif }
+
+        %+++++++++++++++++++++++++++ JUST SSVC ++++++++++++++++++++++
+
+
+\clearpage
+
+\BLOCK{ for group in groups|sort(attribute='order') }
+
+  % loop over each of the group's issues ---------- SERIOUSLY I DON'T UNDERSTAND THIS WTF
+  \BLOCK{ for issue in issues|sort(attribute='severity.number', reverse=true) if issue.group.order == group.order }
+    \newpage
+    
+    \subsection{\VAR{ issue.title }}
+    \label{\VAR{ issue.label }}
+
+    \VAR{ issue.description|markdown2latex }
+
+    \subsubsection{Evidence}
+
+    \BLOCK{ for id, evidence in issue.evidence|items() }
+      \paragraph{\VAR{ id }}
+
+      \VAR{ evidence|markdown2latex }
+    \BLOCK{ endfor }
+
+    \subsubsection{Affected Assets}
+
+    \VAR{ issue['affected assets']|markdown2latex }
+
+    \subsubsection{Severity}
+
+    \begin{center}
+      
+      %----ADJUST THIS FOR SSVC BUT CHOOSE THE METHOD FOR THE TABLE (WORKE BUT DOUBLE CHECK)----
+      \BLOCK{ if "cvss" in issues[0]["severity"] }
+        
+      \severitygauge{\VAR{ issue.severity.number }}{\VAR{ issue.severity.number }}
+
+        \BLOCK{ if issue.severity.cvss }
+          \BLOCK{ if issue.severity.cvss[0] == '2'}
+            \CVSStwo{\VAR{ issue.severity.cvss|join('}{') }}
+          \BLOCK{ else }
+            \CVSSthree{\VAR{ issue.severity.cvss|join('}{') }}
+          \BLOCK{ endif }
+        \BLOCK{ endif }
+
+        \BLOCK{ if issue.severity.dread }
+          \DREAD{\VAR{ issue.severity.dread|join('}{') }}  
+        \BLOCK{ endif }
+      
+      \BLOCK{ else }
+        \severitygaugeSSVC[2]{\VAR{issue.severity.value}} \newline
+
+        \SSVCtwo{\VAR{ issue.severity.ssvc|join('}{') }}
+
+      \BLOCK{ endif }  
+
+
+    \end{center}
+      % ---------------------------------------------------------------------------------
+
+
+
+    \BLOCK{ if issue.recommendations }
+      \subsubsection{Recommendations}
+
+      \VAR{ issue.recommendations|markdown2latex }
+    \BLOCK{ endif }
+
+    \BLOCK{ if issue.references }
+      \subsubsection{References}
+
+      \VAR{ issue.references|markdown2latex }
+    \BLOCK{ endif }
+
+    \BLOCK{ if issue.images }
+      \subsubsection{Images}
+      
+      \BLOCK{ for image in issue.images }
+        \begin{minipage}[c]{\textwidth}
+          \centering
+          \includegraphics[width=\textwidth]{\VAR{ group.graphics_path }\VAR{ image.file }}
+          \captionof{figure}{\VAR{ image.caption }}
+          \label{\VAR{ issue.label }:\VAR{ image.file }}
+          \vspace{4ex}
+        \end{minipage}
+      \BLOCK{ endfor }
+    \BLOCK{ endif }
+
+    \clearpage
+
+  \BLOCK{ endfor }
+  
+\BLOCK{ endfor }
+
+\end{document}
